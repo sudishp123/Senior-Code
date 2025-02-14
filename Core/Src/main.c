@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RX_BUFFER_SIZE 5
+#define RX_BUFFER_SIZE 20
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,10 +52,13 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Frequency Variables */
-float_t strain_rate;
-float_t length_specimen = 0.004; /* Change Length */
-float_t radius_specimen = 0.0015; /* Change Length */
-uint16_t prescaler = 12;
+float_t strain_rate; //Strain Rate Will be Pulled as an input through UART
+float_t strain;
+float_t length_specimen = 0.004; //Length of the Sample
+float_t radius_specimen = 0.0015; //Radius of the Sample
+
+//Variables Used to Calculate Speed from Strain Rater and then to create PWM Signals
+uint16_t prescaler = 12; 
 uint16_t steps_per = 1600;
 uint16_t min_seconds = 60;
 uint32_t clock_frequency = 16e6;
@@ -63,12 +66,16 @@ uint8_t duration = 50;
 float_t speed;
 uint16_t ARR;
 uint16_t frequency;
+
+//Variables for UART Communication
 uint16_t lux = 0;
 float_t angle;
 char msg[100];
 uint8_t rx_buffer[RX_BUFFER_SIZE];
 uint8_t tx_buffer[50];
 uint8_t rx_index = 0;
+
+//Variable Changes when terminate test is clicked
 volatile uint8_t stop_motor= 0;
 /* USER CODE END PV */
 
@@ -83,6 +90,8 @@ void Motor_Enable(uint8_t ena);
 void Motor_SetPWM(void);
 void Motor_SetDirection(uint8_t dir);
 void Motor_RampUp(uint16_t maxFrequency, uint16_t duration);
+uint16_t read_ADC(void);
+float calculate_velocity(float dt);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -133,22 +142,21 @@ int main(void)
     /* USER CODE END WHILE */
     if (strain_rate > 0)
         {
-            Motor_Enable(1);
-            Motor_SetDirection(1); // CW Direction
-            
-            if (strain_rate <= 13)
-            {
-              Motor_SetPWM();  
-            }
-            else
-            {
-                Motor_RampUp(frequency, duration);
-            }
+          Motor_Enable(1);
+          Motor_SetDirection(1); // CW Direction
+          if (strain_rate <= 13)
+          {
+            Motor_SetPWM();  
+          }
+          else
+          {
+          Motor_RampUp(frequency, duration);
+          }
         }
         else
         {
-            Motor_Enable(0); 
-            HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+        Motor_Enable(0); 
+        HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
         }
 
     HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
@@ -488,43 +496,13 @@ void Motor_SetPWM(void)
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (huart->Instance == USART2)
-    {
-        uint8_t received_char = rx_buffer[rx_index];
-
-        if (received_char == 'S')
-        {
-          stop_motor=1;
-        }
-
-        if (received_char == '\n' || rx_index >= RX_BUFFER_SIZE)
-        {
-          rx_buffer[rx_index] = '\0';
-          strain_rate = strtof((char*)rx_buffer, NULL);
-          speed = (sqrt(3) * strain_rate * length_specimen * min_seconds) / (2 * M_PI * radius_specimen);
-          frequency = (speed * steps_per) / min_seconds;
-          ARR = clock_frequency / (prescaler * frequency);  
-          HAL_UART_Transmit(&huart2, rx_buffer, rx_index, HAL_MAX_DELAY);
-          rx_index = 0; 
-        }
-        else
-        {
-          rx_index++;
-        }
-    }
-    HAL_UART_Receive_IT(&huart2, &rx_buffer[rx_index], 1);
+uint16_t read_ADC(void){
+  HAL_ADC_Start(&hadc1);
+  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+  return HAL_ADC_GetValue(&hadc1);
 }
 
-// uint16_t read_ADC(void){
-//   HAL_ADC_Start(&hadc1);
-//   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-//   return HAL_ADC_GetValue(&hadc1);
-// }
-
-
-float calculate_velocity(float dt){
+float_t calculate_velocity(float dt){
   static uint16_t prev_adc_value = 0;
   uint16_t current_adc_value = read_ADC();
 
@@ -541,6 +519,44 @@ float calculate_velocity(float dt){
   prev_adc_value = current_adc_value;
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+        uint8_t received_char = rx_buffer[rx_index];
+
+        if (received_char == 'S')
+        {
+          stop_motor=1;
+        }
+
+        else if (received_char == '\n' || rx_index >= RX_BUFFER_SIZE)
+        {
+          rx_buffer[rx_index] = '\0';
+          HAL_UART_Transmit(&huart2, rx_buffer, rx_index, HAL_MAX_DELAY);
+
+          char *token = strtok((char*)rx_buffer," ");
+          if (token != NULL)
+          {
+            strain_rate= strtof(token, NULL);
+            token= strtok(NULL, " ");
+            if (token != NULL)
+            {
+              strain = strtof(token, NULL);
+            }
+          }
+          speed = (sqrt(3) * strain_rate * length_specimen * min_seconds) / (2 * M_PI * radius_specimen);
+          frequency = (speed * steps_per) / min_seconds;
+          ARR = clock_frequency / (prescaler * frequency);  
+          rx_index = 0; 
+        }
+        else
+        {
+          rx_index++;
+        }
+    }
+    HAL_UART_Receive_IT(&huart2, &rx_buffer[rx_index], 1);
+}
 /* USER CODE END 4 */
 
 /**

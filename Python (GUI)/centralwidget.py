@@ -117,7 +117,9 @@ class CentralWidget(QWidget):
     def process_input(self):
         try:
             strain_rate = float(self.input_strain_rt.text())
-            self.UART.send_data(strain_rate)
+            strain = float(self.input_strain.text())
+            self.UART.send_data(f"{strain_rate:.2f} ")
+            self.UART.send_data(f"{strain:.2f}\n")
             self.UART.receive_data()
         # Save or process the input further
         except ValueError:

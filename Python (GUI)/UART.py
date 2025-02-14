@@ -13,9 +13,9 @@ class UART:
     def send_data(self, data):
         """ Send strain rate data to STM32 via UART """
         if isinstance(data, float):
-            data_str = f"{data:.2f}\n"  # Format float with two decimals
+            data_str = f"{data:.2f}"  # Format float with two decimals
         else:
-            data_str = str(data) + "\n"
+            data_str = str(data)
 
         if self.ser.is_open:
             self.ser.write(data_str.encode())  # Send data
