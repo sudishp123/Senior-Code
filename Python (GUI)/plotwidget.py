@@ -18,103 +18,100 @@ from PySide6.QtWidgets import (
 )
 
 class PlotWidget(QWidget):
-    def __init__(self):
+    def __init__(self, title, xlabel, ylabel):
         super().__init__()
-        self.name = "regular"
 
-        
-        self.annotation_names = []
-        self.legend_annotations = []
-        self.first = True
-        self.xaxis_min_limit = 0
-        self.xaxis_max_limit = 0.8
-        self.yaxis_min_limit = 0
-        self.yaxis_max_limit = 350
-        self.borderthickness = 1
-        self.xlabel = "Strain (ε)"
-        self.ylabel = "Stress (σ)"
-        self.fig = self.scatter_plot() # Creates an initial empty plot
-        
-        # group_box = QGroupBox("Charts") # Optional, Defines a border and title around plots
-        
-        # Set up web engines to view plots
-        self.web_view1 = QWebEngineView()
+        # Create a plot
+        self.fig = self.create_plot(title, xlabel, ylabel)
 
-        # Update plot with initial figure
+        # Create a web view to display the plot
+        self.web_view = QWebEngineView()
         self.update_fig()
-        
+
+        # Set up layout
         layout = QVBoxLayout()
-        layout.addWidget(self.web_view1)
+        layout.addWidget(self.web_view)
         self.setLayout(layout)
 
-        # The following is only required if group box is used.
-        # v_layout2 = QVBoxLayout()
-        # v_layout2.addWidget(group_box)
-        # self.setLayout(v_layout2)
-        
-    def scatter_plot(self, annotations=[]):
-        # Create the scatter plot
+    def create_plot(self, title, xlabel, ylabel):
+        """Creates an empty Plotly figure with specified labels."""
         layout = go.Layout(
-            margin=go.layout.Margin(l=0, r=10, b=0, t=25),
+            title=dict(
+                text=title,
+                x=0.5,  # Center the title
+                xanchor="center",
+                yanchor="top",
+                font=dict(
+                    family="Raleway, sans-serif",  # Change font
+                    size=20,  # Adjust title font size
+                    color="black"  # Title color
+                )
+            ),
             xaxis=dict(
-                title=dict(text=self.xlabel, font=dict(size=18, family="CMU Serif Bold", weight="bold")),
-                tickfont=dict(size=16, family="CMU Serif Bold", weight="bold"),
-                ticks="outside",
-                tickwidth=self.borderthickness,
-                ticklen=8,
-                minor=dict(tickwidth=self.borderthickness, ticklen=3),
-                linecolor="black",
-                linewidth=self.borderthickness,
+                title=xlabel,
+                titlefont=dict(
+                    family="Raleway, sans-serif",  # Font for axis labels
+                    size=18,
+                    color="black"
+                ),
+                tickfont=dict(size=14),
+                linecolor="blue",
                 mirror=True,
-                range=[self.xaxis_min_limit, self.xaxis_max_limit],
             ),
             yaxis=dict(
-                title=dict(text=self.xlabel, font=dict(size=18, family="CMU Serif Bold", weight="bold")),
-                tickfont=dict(size=16, family="CMU Serif Bold", weight="bold"),
-                ticks="outside",
-                tickwidth=self.borderthickness,
-                ticklen=8,
-                minor=dict(tickwidth=self.borderthickness, ticklen=3),
+                title=ylabel,
+                titlefont=dict(
+                    family="Arial, sans-serif",  # Font for axis labels
+                    size=18,
+                    color="black"
+                ),
+                tickfont=dict(size=14),
                 linecolor="black",
-                linewidth=self.borderthickness,
                 mirror=True,
-                range=[self.yaxis_min_limit, self.yaxis_max_limit],
             ),
-            showlegend=True,
-            # title=dict(text="Uploaded Data, ε vs σ", x=0.5, font=dict(size=13)),  # left margin  # right margin  # bottom margin  # top margin
-            # paper_bgcolor="white",
-            # plot_bgcolor="white",
-            annotations=annotations,
+            showlegend=False,
         )
+        return go.Figure(layout=layout)
 
-        fig = go.Figure(layout=layout)
-        return fig
-    
     def update_fig(self):
-        html = (
-            html
-        ) = """<html><head><meta charset="utf-8" /></head><head><meta charset="utf-8" />
-            <script type="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script> <script src="https://cdn.plot.ly/plotly-2.34.0.min.js" charset="utf-8"></script>
-            </head><body>"""
-        html += self.fig.to_html(
-            include_plotlyjs=False, include_mathjax=False, full_html=False
-        )
-        html += "</body></html>"
-    
-        # Set the HTML to the web view
-        self.web_view1.setHtml(html)
+        """Generates HTML for the Plotly figure and ensures MathJax loads correctly."""
+        html = f"""
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <script src="https://cdn.plot.ly/plotly-2.34.0.min.js"></script>
+            <script type="text/javascript" async 
+                src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+            </script>
+            <script type="text/javascript">
+                MathJax = {{
+                    tex2jax: {{
+                        inlineMath: [['$', '$']],
+                        displayMath: [['$$', '$$']]
+                    }},
+                    showProcessingMessages: false,
+                    messageStyle: "none"
+                }};
+            </script>
+        </head>
+        <body>
+        {self.fig.to_html(include_plotlyjs=False, full_html=False)}
+        <script>
+            // Explicitly trigger MathJax rendering after the page loads
+            window.onload = function() {{
+                if (typeof MathJax !== "undefined") {{
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                }}
+            }};
+        </script>
+        </body>
+        </html>
+        """
+        self.web_view.setHtml(html)
         
-    def add_original_trace(self, stresses, strains):
-        # index = temperatures.index(item.temperature) + 1
-        self.fig.add_trace(
-            go.Scatter(
-                x=strains,
-                y=stresses,
-                mode="lines",      
-                name="Stress-Strain Curve",
-                showlegend=True, # Orginally false, could change back
-            )
-        )
+    def add_trace(self, x_data, y_data, name="New Data"):
+        """Adds a new trace to the plot and updates the figure."""
+        self.fig.add_trace(go.Scatter(x=x_data, y=y_data, mode="lines", name=name))
         self.update_fig()
         
         

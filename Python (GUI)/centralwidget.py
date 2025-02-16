@@ -12,108 +12,91 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QL
 from plotwidget import PlotWidget
 from UART import UART
 
-
 class CentralWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Central Widget")
         self.UART = UART()
-        
-        # Integrating the plot into main window
-        self.plot_widget = PlotWidget()  # Create an instance of the plot class
-        
-        # self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        
+
+        # Create input fields and labels (UI Controls)
         double_validator = QDoubleValidator()
-        
-        strain_rt = QLabel("Strain Rate")
+
+        strain_rt_label = QLabel("Strain Rate:")
         self.input_strain_rt = QLineEdit()
         self.input_strain_rt.setValidator(double_validator)
-        # self.lower_limit_line.setText(str(data_widget.interpolation_lower_limit))
-        strain_rt_unit = QLabel("s^-1") # Fix exponent later
-        
-        strain = QLabel("Strain")
+        strain_rt_unit = QLabel("s<sup>-1</sup>") 
+
+        strain_label = QLabel("Max Strain:")
         self.input_strain = QLineEdit()
         self.input_strain.setValidator(double_validator)
-        # self.lower_limit_line.setText(str(data_widget.interpolation_lower_limit))
 
-        max_torque = QLabel("Maximum Torque")
-        equals = QLabel("=")
-        max_torque_value = QLabel("4.2") # Change to be dependant on code later down the line
-        torque_unit = QLabel("N.m")
-        
-        angular_disp = QLabel("Total Angular Displacement")
-        angular_disp_value = QLabel("8.8") # Change to be dependant on code later down the line
-        angular_disp_unit = QLabel("Revolutions") # Fix exponent later
-        
+        max_torque_label = QLabel("Maximum Torque:")
+        max_torque_value = QLabel("4.2 N·m")  # Dynamic value later
+
+        angular_disp_label = QLabel("Total Angular Displacement:")
+        angular_disp_value = QLabel("8.8 Revolutions")  # Dynamic value later
+
+        # Buttons
         start_button = QPushButton("Start Test")
         start_button.clicked.connect(self.process_input)
-        # start_button.clicked.connect(self.apply_filter) # Change "apply_filter" to run start code for test.
-        
+
         terminate_button = QPushButton("Terminate Test")
-        terminate_button.clicked.connect(self.update_plot) # Change "apply_filter" to run terminate code for test and populate graph.
         terminate_button.clicked.connect(self.terminate_test)
+        terminate_button.clicked.connect(self.update_plot)
         
         export_button = QPushButton("Export Data")
         # start_button.clicked.connect(self.apply_filter) # Change "apply_filter" to run export to excel code for test.
         
-        # Add all buttons and plots in here later, testing to see if pop up window is achievable first
-        
         # interpolate_button = QPushButton("Interpolate Data")
         # interpolate_button.clicked.connect(self.apply_interpolation)
 
-        h_layout1 = QHBoxLayout()
-        h_layout1.addWidget(strain_rt)
-        h_layout1.addWidget(self.input_strain_rt)
-        h_layout1.addWidget(strain_rt_unit)
-        
-        h_layout2 = QHBoxLayout()
-        h_layout2.addWidget(strain)
-        h_layout2.addWidget(self.input_strain)
+        # Layout for UI controls (top-left corner)
+        controls_layout = QVBoxLayout()
+        controls_layout.addWidget(strain_rt_label)
+        controls_layout.addWidget(self.input_strain_rt)
+        controls_layout.addWidget(strain_rt_unit)
 
-        h_layout3 = QHBoxLayout()
-        h_layout3.addWidget(max_torque)
-        h_layout3.addWidget(equals)
-        h_layout3.addWidget(max_torque_value) # Change to be dependant on code later down the line
-        h_layout3.addWidget(torque_unit)
+        controls_layout.addWidget(strain_label)
+        controls_layout.addWidget(self.input_strain)
 
-        h_layout4 = QHBoxLayout()
-        h_layout4.addWidget(angular_disp)
-        h_layout4.addWidget(equals)
-        h_layout4.addWidget(angular_disp_value) # Change to be dependant on code later down the line
-        h_layout4.addWidget(angular_disp_unit)
+        controls_layout.addWidget(max_torque_label)
+        controls_layout.addWidget(max_torque_value)
 
-        v_layout1 = QVBoxLayout()
-        v_layout1.setSpacing(15)
-        v_layout1.addLayout(h_layout1)
-        v_layout1.addLayout(h_layout2)
-        v_layout1.addLayout(h_layout3)
-        v_layout1.addLayout(h_layout4)
-        
-        h_layout5 = QHBoxLayout()
-        h_layout5.addWidget(start_button)
-        h_layout5.addWidget(terminate_button)
-        h_layout5.addWidget(export_button)
-        
-        v_layout2 = QVBoxLayout()
-        v_layout2.setSpacing(15)
-        v_layout2.addLayout(v_layout1)
-        v_layout2.addLayout(h_layout5)
-        
-        main_layout = QHBoxLayout()  # Main horizontal layout
-        main_layout.addLayout(v_layout2)  # Add controls on the left
-        main_layout.addWidget(self.plot_widget)  # Add the plot on the right
-        
+        controls_layout.addWidget(angular_disp_label)
+        controls_layout.addWidget(angular_disp_value)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(start_button)
+        buttons_layout.addWidget(terminate_button)
+        buttons_layout.addWidget(export_button)
+        controls_layout.addLayout(buttons_layout)
+
+        # Create the three plot widgets
+        self.plot1 = PlotWidget("Stress-Strain Curve", "Strain (ε)", "Stress (σ)")
+        self.plot2 = PlotWidget("Torque vs Time", "Time (s)", "Torque (N·m)")
+        self.plot3 = PlotWidget("Strain Rate vs Time", "Time (s)", r"Strain Rate ($\dot{\varepsilon}$)")
+
+        # **Grid Layout for UI + 3 Plots**
+        main_layout = QGridLayout()
+        main_layout.addLayout(controls_layout, 0, 0)  # UI controls (top-left)
+        main_layout.addWidget(self.plot1, 1, 0)  # Plot 1 (top-right)
+        main_layout.addWidget(self.plot2, 0, 1)  # Plot 2 (bottom-left)
+        main_layout.addWidget(self.plot3, 1, 1)  # Plot 3 (bottom-right)
+
         self.setLayout(main_layout)
-        self.setWindowFlags(Qt.Window | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
-        
-    def update_plot(self):
-        # Updates the plot with new data when Start Test is clicked.
-       x_data = [0.0, 0.2, 0.4, 0.6, 0.8]
-       y_data = [50, 120, 180, 250, 300]
-       self.plot_widget.add_original_trace(y_data, x_data)  # Update the plot
 
+    def update_plots(self):
+        """Simulates adding new data to all three plots."""
+        strain_data = [0.1, 0.2, 0.3, 0.4, 0.5]
+        t_data = [0, 1, 2, 3, 4, 5]
+        y_data1 = [60, 90, 110, 120, 125, 123]
+        y_data2 = [10, 6, 5.5, 5.5, 5.6, 5.7]
+        y_data3 = [2.7, 9.2, 10.1, 10.2, 10.1, 10]
+
+        self.plot1.add_trace(strain_data, y_data1, "Stress Data")
+        self.plot2.add_trace(t_data, y_data2, "Torque Data")
+        self.plot3.add_trace(t_data, y_data3, "Strain Rate Data")
+        
     def process_input(self):
         try:
             strain_rate = float(self.input_strain_rt.text())
@@ -125,7 +108,7 @@ class CentralWidget(QWidget):
         except ValueError:
             QMessageBox.warning(self, "Invalid Input", "Please enter valid numbers for strain rate .")
         # self.setLayout(layout)
-
+    
     def terminate_test(self):
         stop_test= 'S'
         self.UART.send_data(stop_test)
