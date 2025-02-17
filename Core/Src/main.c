@@ -62,10 +62,11 @@ uint16_t prescaler = 12;
 uint16_t steps_per = 1600;
 uint16_t min_seconds = 60;
 uint32_t clock_frequency = 16e6;
-uint8_t duration = 50;
+float_t duration;
 float_t speed;
 uint16_t ARR;
 uint16_t frequency;
+float_t velocity;
 
 //Variables for UART Communication
 uint16_t lux = 0;
@@ -140,6 +141,12 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+    // if (stop_motor)
+    // {
+    //   HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+    //   Motor_Enable(0);
+    //   stop_motor = 0; 
+    // }
     if (strain_rate > 0)
         {
           Motor_Enable(1);
@@ -163,7 +170,7 @@ int main(void)
     HAL_Delay(500);
     float sampling_frequency = (2e6)/(12.5+239.5);
     float dt= 1/(sampling_frequency);
-    float velocity = calculate_velocity(dt);
+    velocity = calculate_velocity(dt);
 
     /* USER CODE BEGIN 3 */
     // HAL_ADC_Start(&hadc1);
@@ -173,15 +180,9 @@ int main(void)
     // sprintf(msg, "Velocity: %.2f m/s\r\n", velocity);
     // HAL_UART_Transmit(&huart2,(uint8_t *)msg,strlen(msg),HAL_MAX_DELAY);
     // HAL_Delay(500);
-    if (stop_motor)
-    {
-      HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
-      Motor_Enable(0);
-      stop_motor = 0; 
-    }
     HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
     HAL_Delay(500);
-    } 
+  } 
   /* USER CODE END 3 */
 }
 
@@ -444,8 +445,10 @@ void Motor_RampUp(uint16_t maxFrequency, uint16_t duration)
   __HAL_TIM_SET_AUTORELOAD(&htim3, ARR - 1);
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ARR / 2);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  strain_rate=0;
   HAL_Delay(duration * 1000);
   HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+  Motor_Enable(0);
 }
 
 /**
@@ -493,7 +496,9 @@ void Motor_SetPWM(void)
   __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ARR / 2);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
     HAL_Delay(duration*1000);
+    strain_rate=0;
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+    Motor_Enable(0);
 }
 
 uint16_t read_ADC(void){
@@ -527,7 +532,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
         if (received_char == 'S')
         {
-          stop_motor=1;
+          strain_rate=0;
+          Motor_Enable(0);
         }
 
         else if (received_char == '\n' || rx_index >= RX_BUFFER_SIZE)
@@ -547,6 +553,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           }
           speed = (sqrt(3) * strain_rate * length_specimen * min_seconds) / (2 * M_PI * radius_specimen);
           frequency = (speed * steps_per) / min_seconds;
+          duration = strain/strain_rate;
           ARR = clock_frequency / (prescaler * frequency);  
           rx_index = 0; 
         }
