@@ -42,7 +42,7 @@ class CentralWidget(QWidget):
 
         terminate_button = QPushButton("Terminate Test")
         terminate_button.clicked.connect(self.terminate_test)
-        terminate_button.clicked.connect(self.update_plot)
+        # terminate_button.clicked.connect(self.update_plot)
         
         export_button = QPushButton("Export Data")
         # start_button.clicked.connect(self.apply_filter) # Change "apply_filter" to run export to excel code for test.

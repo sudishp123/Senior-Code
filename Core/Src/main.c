@@ -35,7 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RX_BUFFER_SIZE 20
+#define RX_BUFFER_SIZE 20 //The size of the buffer that receives data from Python
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
