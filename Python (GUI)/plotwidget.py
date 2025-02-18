@@ -55,13 +55,13 @@ class PlotWidget(QWidget):
                     color="black"
                 ),
                 tickfont=dict(size=14),
-                linecolor="blue",
+                linecolor="black",
                 mirror=True,
             ),
             yaxis=dict(
                 title=ylabel,
                 titlefont=dict(
-                    family="Arial, sans-serif",  # Font for axis labels
+                    family="Raleway, sans-serif",  # Font for axis labels
                     size=18,
                     color="black"
                 ),
