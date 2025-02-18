@@ -74,7 +74,7 @@ class CentralWidget(QWidget):
         # Create the three plot widgets
         self.plot1 = PlotWidget("Stress-Strain Curve", "Strain (ε)", "Stress (σ)")
         self.plot2 = PlotWidget("Torque vs Time", "Time (s)", "Torque (N·m)")
-        self.plot3 = PlotWidget("Strain Rate vs Time", "Time (s)", r"Strain Rate ($\dot{\varepsilon}$)")
+        self.plot3 = PlotWidget("Strain Rate vs Time", "Time (s)",  r"Strain Rate ($\dot{\varepsilon}$)")
 
         # **Grid Layout for UI + 3 Plots**
         main_layout = QGridLayout()
@@ -85,8 +85,10 @@ class CentralWidget(QWidget):
 
         self.setLayout(main_layout)
 
-    def update_plots(self):
+    def update_plot(self):
         """Simulates adding new data to all three plots."""
+        # Note: These are just sample arrays - Sudhish, send data arrays to this function under respective variables
+        # and buttons from central widget will call them in.
         strain_data = [0.1, 0.2, 0.3, 0.4, 0.5]
         t_data = [0, 1, 2, 3, 4, 5]
         y_data1 = [60, 90, 110, 120, 125, 123]
