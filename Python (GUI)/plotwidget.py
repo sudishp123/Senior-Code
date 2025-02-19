@@ -42,7 +42,7 @@ class PlotWidget(QWidget):
                 xanchor="center",
                 yanchor="top",
                 font=dict(
-                    family="Raleway, sans-serif",  # Change font
+                    family="Arial, sans-serif",  # Change font
                     size=20,  # Adjust title font size
                     color="black"  # Title color
                 )
@@ -50,7 +50,7 @@ class PlotWidget(QWidget):
             xaxis=dict(
                 title=xlabel,
                 titlefont=dict(
-                    family="Raleway, sans-serif",  # Font for axis labels
+                    family="Arial, sans-serif",  # Font for axis labels
                     size=18,
                     color="black"
                 ),
@@ -61,9 +61,10 @@ class PlotWidget(QWidget):
             yaxis=dict(
                 title=ylabel,
                 titlefont=dict(
-                    family="Raleway, sans-serif",  # Font for axis labels
+                    family="Arial, sans-serif",  # Font for axis labels
                     size=18,
                     color="black"
+                    
                 ),
                 tickfont=dict(size=14),
                 linecolor="black",
