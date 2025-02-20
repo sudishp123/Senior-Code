@@ -35,7 +35,7 @@ class CentralWidget(QWidget):
         # Create input fields and labels (UI Controls)
         double_validator = QDoubleValidator()
         
-                # Apply input field styling
+        # Apply input field styling
         input_style = """
             QLineEdit {
                 border: 2px solid #aaa;
@@ -209,7 +209,7 @@ class CentralWidget(QWidget):
         buttons_layout.addStretch()
         
         # Group box for inputs and buttons
-        buttons_group = QGroupBox("User Controls")
+        buttons_group = QGroupBox("Controls")
         buttons_group_layout = QVBoxLayout()
         buttons_group_layout.addLayout(inputs_layout)
         buttons_group_layout.addSpacing(30)
@@ -225,9 +225,10 @@ class CentralWidget(QWidget):
         # controls_layout.addLayout(display_layout)
 
         # Create the three plot widgets
-        self.plot1 = PlotWidget("Stress vs. Strain", "Strain (ε)", "Stress (σ)")
+        self.plot1 = PlotWidget("Stress vs. Strain", "True Strain", "True Stress (MPa)") # , ε, σ
         self.plot2 = PlotWidget("Torque vs. Time", "Time (s)", "Torque (N·m)")
-        self.plot3 = PlotWidget("Strain Rate vs. Time", "Time (s)",  r"Strain Rate ($\dot{\varepsilon}$)")
+        self.plot3 = PlotWidget("Strain Rate vs. Time", "Time (s)", "Strain Rate (s⁻¹)")
+                                # r"Strain Rate ($\dot{\varepsilon}$)")
 
         # **Grid Layout for UI + 3 Plots**
         main_layout = QGridLayout()
@@ -235,6 +236,10 @@ class CentralWidget(QWidget):
         main_layout.addWidget(self.plot1, 1, 0)  # Plot 1 (top-right)
         main_layout.addWidget(self.plot2, 0, 1)  # Plot 2 (bottom-left)
         main_layout.addWidget(self.plot3, 1, 1)  # Plot 3 (bottom-right)
+        
+        main_layout.setHorizontalSpacing(5)  # Reduce horizontal gaps
+        main_layout.setVerticalSpacing(5)  # Reduce vertical gaps
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
         self.setLayout(main_layout)
 
