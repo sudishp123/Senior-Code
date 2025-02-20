@@ -20,7 +20,7 @@ app.setStyle("windowsvista")
 # #App-Icon
 # icon_path = QDir.toNativeSeparators(f"{app_dir}/Python (GUI)/UNB_Logo.png")
 app_dir = os.path.dirname(os.path.abspath(__file__))  # Get the script's directory
-icon_path = QDir.toNativeSeparators(os.path.join(app_dir, "Python (GUI)", "UNB_Logo.png"))
+icon_path = QDir.toNativeSeparators(os.path.join(app_dir, "UNB_Logo.png"))
 
 # Create a splash screen
 splash_pix = QPixmap(":/images/SplashScreen.jpg")
@@ -39,7 +39,7 @@ app.setWindowIcon(app_icon)
 
 # Create a splash screen
 # splash_pix = QPixmap(icon_path)
-splash_pix = QPixmap(":/Python (GUI)/UNB_Logo.png")
+splash_pix = QPixmap(icon_path)
 splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
 splash.show()
 

@@ -25,12 +25,12 @@ class DataProcessing:
             normal_strain = shear_strain/sqrt(3)
             return normal_strain
         
-        def time_to_strain_rate(self, max_strain, time):
+        def time_to_strain_rate(self, max_strain, time, rotation):
             """ Converts time and total rotation into strain rate """
             rotation_rads = rotation*2*pi # rads
             
         def write_to_excel(self):
-            """ 
+            ""
             
             
             

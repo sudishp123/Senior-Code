@@ -37,66 +37,44 @@ class PlotWidget(QWidget):
         """Creates a styled Plotly figure that visually matches the UI theme."""
         layout = go.Layout(
             title=dict(
-                text=title,
-                x=0.5,  # Center the title
-                xanchor="center",
-                yanchor="top",
-                font=dict(
-                    family="CMU Serif, Arial, sans-serif",  # Matching UI font
-                    size=20,
-                    color="black",
-                    weight="bold"
+            text=title,
+            x=0.5,  # Center the title
+            xanchor="center",
+            yanchor="top",
+            font=dict(
+                family="Raleway, sans-serif",  # Change font
+                size=20,  # Adjust title font size
+                color="black"  # Title color
                 )
             ),
-            xaxis=dict(
-                title=xlabel,
-                titlefont=dict(
-                    family="CMU Serif, Arial, sans-serif",
-                    size=16,
-                    color="black",
-                    weight="bold"
-                ),
-                tickfont=dict(
-                    family="CMU Serif, Arial, sans-serif",
-                    size=14,
-                    color="black",
-                    weight="bold"
-                ),
-                linecolor="#aaa",  # Matches input field border
-                linewidth=2,
-                mirror=True,
-                showgrid=True,
-                gridcolor="#ddd",  # Subtle grid lines
-                zeroline=True,
-                zerolinecolor="black"
+        xaxis=dict(
+            title=dict(
+            text=xlabel,  # Proper way to set axis title
+            font=dict(
+                family="Raleway, sans-serif",  # Font for axis labels
+                size=18,
+                color="black"
+                )
             ),
-            yaxis=dict(
-                title=ylabel,
-                titlefont=dict(
-                    family="CMU Serif, Arial, sans-serif",
-                    size=16,
-                    color="black",
-                    weight="bold"
-                ),
-                tickfont=dict(
-                    family="CMU Serif, Arial, sans-serif",
-                    size=14,
-                    color="black",
-                    weight="bold"
-                ),
-                linecolor="#aaa",
-                linewidth=2,
-                mirror=True,
-                showgrid=True,
-                gridcolor="#ddd",
-                zeroline=True,
-                zerolinecolor="black"
-            ),
-            plot_bgcolor="white",
-            paper_bgcolor="rgba(240,240,240,1.0)",
-            margin=dict(l=60, r=60, t=50, b=50),  # Balanced spacing
-            showlegend=False,
-        )
+            tickfont=dict(size=14),
+            linecolor="black",
+            mirror=True,
+    ),
+    yaxis=dict(
+        title=dict(
+        text=ylabel,  # Proper way to set axis title
+        font=dict(
+            family="Raleway, sans-serif",  # Font for axis labels
+            size=18,
+            color="black"
+            )
+        ),
+        tickfont=dict(size=14),
+        linecolor="black",
+        mirror=True,
+    ),
+    showlegend=False,
+)
     
         return go.Figure(layout=layout)
 
