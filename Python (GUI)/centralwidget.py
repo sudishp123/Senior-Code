@@ -229,6 +229,16 @@ class CentralWidget(QWidget):
         self.plot2 = PlotWidget("Torque vs. Time", "Time (s)", "Torque (N·m)")
         self.plot3 = PlotWidget("Strain Rate vs. Time", "Time (s)", "Strain Rate (s⁻¹)")
                                 # r"Strain Rate ($\dot{\varepsilon}$)")
+        
+        # Prevent the plots from disappearing by setting a minimum height
+        self.plot1.setMinimumHeight(350)
+        self.plot2.setMinimumHeight(350)
+        self.plot3.setMinimumHeight(350)
+        
+        # Make them expandable so they scale properly
+        self.plot1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.plot2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.plot3.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # **Grid Layout for UI + 3 Plots**
         main_layout = QGridLayout()
@@ -236,6 +246,12 @@ class CentralWidget(QWidget):
         main_layout.addWidget(self.plot1, 1, 0)  # Plot 1 (top-right)
         main_layout.addWidget(self.plot2, 0, 1)  # Plot 2 (bottom-left)
         main_layout.addWidget(self.plot3, 1, 1)  # Plot 3 (bottom-right)
+        
+        main_layout.setRowStretch(0, 1)  # UI Controls + Plot 2 take 1 part of the height
+        main_layout.setRowStretch(1, 2)  # Plot 1 + Plot 3 take 2 parts (bigger plots)
+        
+        main_layout.setColumnStretch(0, 1)  # Left column takes 1 part of the width
+        main_layout.setColumnStretch(1, 1)  # Right column takes 1 part of the width
         
         main_layout.setHorizontalSpacing(5)  # Reduce horizontal gaps
         main_layout.setVerticalSpacing(5)  # Reduce vertical gaps
