@@ -6,7 +6,6 @@ Created on Tue Jan 21 17:25:36 2025
 """
 
 from PySide6.QtWidgets import QMainWindow, QStatusBar
-
 from centralwidget import CentralWidget
 
 class MainWindow(QMainWindow):
